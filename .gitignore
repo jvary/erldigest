@@ -1,0 +1,17 @@
+_*
+*.o
+*.beam
+*.plt
+*.iml
+*.swp
+*.swo
+deps
+ebin
+log
+logs
+.eunit
+.rebar
+.rebar3
+.erlang.cookie
+rebar3.crashdump
+erl_crash.dump

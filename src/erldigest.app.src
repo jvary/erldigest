@@ -1,0 +1,10 @@
+{application, erldigest,
+ [{description, "Provide response to digest authentication challenges"},
+  {vsn, "0.1.0"},
+  {modules, [erldigest]},
+  {applications, [kernel, stdlib]},
+
+  {maintainers, ["Kevin Lagace"]},
+  {licenses, ["MIT"]},
+  {links, [{"Github", "https://github.com/flash2307/erldigest"}]}
+ ]}.
