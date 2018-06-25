@@ -15,3 +15,5 @@ logs
 .erlang.cookie
 rebar3.crashdump
 erl_crash.dump
+
+.vscode
