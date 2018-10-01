@@ -1,6 +1,6 @@
 -module(erldigest_nonce_generator).
 
--export([generate_nonce/0]).
+-export([generate/0]).
 
-generate_nonce() ->
+generate() ->
   {<<"00000001">>, <<"0a4f113b">>}. % TODO: Really generate nonce

@@ -10,6 +10,9 @@ assert_response_are_equivalent(Expected, Response) ->
   ?assertMatch(NewExpected, NewResponse).
 
 response_to_list(Response) ->
+  Regex = <<"((?:[^=]+)=(?:\"?[^\"]*\"?)(?:\\s*,\\s*|\\s*$))">>,
+  {match, Captures} = re:run(Response,  Regex, [global]),
+  Fields = extract_fields(Captures, Response),
   List = 
     lists:foldl(fun(Element, Acc) ->
                   NewElement =
@@ -18,5 +21,14 @@ response_to_list(Response) ->
                       _ -> Element
                     end,
                   [NewElement | Acc]
-                end, [], binary:split(Response, <<" ">>, [global])),
+                end, [], Fields),
   lists:sort(List).
+
+extract_fields(Captures, Challenge) ->
+  extract_fields(Captures, Challenge, []).
+extract_fields([Head | Tail], Challenge, Fields) ->
+  [_, {Begin, Length}] = Head,
+  Field = binary:part(Challenge, Begin, Length),
+  extract_fields(Tail, Challenge, [Field | Fields]);
+extract_fields([], _, Fields) ->
+  Fields.
