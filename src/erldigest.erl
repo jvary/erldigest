@@ -4,18 +4,18 @@
          validate_response/5]).
 
 calculate_response(Method, Uri, Headers, Username, Password) ->
-  {ok, Options} = erldigest_encoder:decode_challenge(Headers),
+  {ok, Options} = erldigest_challenge:parse(Headers),
   NewOptions = Options#{username => Username,
                         password => Password,
                         method => method_to_binary(Method),
                         uri => Uri},
   Algorithm = erldigest_utils:get_digest_algorithm(Options),
   Response = calculate_request_digest(NewOptions, Algorithm),
-  erldigest_encoder:encode_response(Response).
+  erldigest_challenge:make_challenge(Response).
 
 validate_response(Method, Uri, ClientResponse, ServerResponse, HA1) ->
-  {ok, Challenge} = erldigest_encoder:decode_challenge(ServerResponse),
-  {ok, Response} = erldigest_encoder:decode_challenge(ClientResponse),
+  {ok, Challenge} = erldigest_challenge:parse(ServerResponse),
+  {ok, Response} = erldigest_challenge:parse(ClientResponse),
   Result = get_solvable_challenge(Response, Challenge#{ha1 => HA1,
                                                          method => method_to_binary(Method),
                                                          uri => Uri}),
