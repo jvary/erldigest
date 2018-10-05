@@ -1,19 +1,19 @@
 -module(erldigest_encoder).
 
--export([decode_challenge_headers/1,
-         encode_response_headers/1]).
+-export([decode_challenge/1,
+         encode_response/1]).
 
 %%%===================================================================
 %%% Decoding
 %%%===================================================================
 
-decode_challenge_headers(<<"Digest ", Challenge/binary>>) ->
-  Regex = <<"([^=]+)=(\"[^\"]*\")(?:\\s*,\\s*|\\s*$)">>,
+decode_challenge(<<"Digest ", Challenge/binary>>) ->
+  Regex = <<"([^=]+)=((?:[^\"]*)|(?:\"[^\"]*\"))(?:\\s*,\\s*|\\s*$)">>,
   {match, Captures} = re:run(Challenge,  Regex, [global]),
   Fields = extract_fields(Captures, Challenge),
   {ok, Fields};
-decode_challenge_headers(_) ->
-  {error, invalid_headers}.
+decode_challenge(_) ->
+  {error, invalid_challenge}.
 
 extract_fields(Captures, Challenge) ->
   extract_fields(Captures, Challenge, #{}).
@@ -33,14 +33,19 @@ get_atom_key(BinaryKey) ->
     <<"opaque">> -> opaque;
     <<"stale">> -> stale;
     <<"algorithm">> -> algorithm;
-    <<"qop">> -> qop
+    <<"qop">> -> qop;
+    <<"username">> -> username;
+    <<"uri">> -> uri;
+    <<"response">> -> response;
+    <<"cnonce">> -> cnonce;
+    <<"nc">> -> nc
   end.
 
 %%%===================================================================
 %%% Encoding
 %%%===================================================================
 
-encode_response_headers(Options) ->
+encode_response(Options) ->
   Fields = encode_response_fields(Options),
   {ok, <<"Digest ", Fields/binary>>}.
 

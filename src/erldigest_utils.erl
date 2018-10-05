@@ -28,9 +28,9 @@ remove_surrounding_quotes(Str, true) ->
 remove_surrounding_quotes(Str, false) ->
   Str.
 
-get_digest_algorithm(<<"MD5", _/binary>>) ->
+get_digest_algorithm(#{algorithm := <<"MD5", _/binary>>}) ->
   md5;
-get_digest_algorithm(<<"SHA-256", _/binary>>) ->
+get_digest_algorithm(#{algorithm := <<"SHA-256", _/binary>>}) ->
   sha256;
 get_digest_algorithm(_) ->
   md5.
