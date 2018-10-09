@@ -5,7 +5,6 @@
          generate_challenge/2]).
 
 -type method() :: atom() | binary() | string().
--type uri() :: {Host::binary(), Path::binary(), Params::binary()}.
 -type qop() :: none | auth | auth_int | both.
 -type challenge() :: erldigest_challenge:challenge().
 
@@ -15,7 +14,7 @@
 
 -spec calculate_response(Method, Uri, Headers, Username, Password) -> Result when
   Method :: method(),
-  Uri :: uri(),
+  Uri :: binary(),
   Headers :: #{binary() => binary()},
   Username :: binary(),
   Password :: binary(),
@@ -32,7 +31,7 @@ calculate_response(Method, Uri, Headers, Username, Password) ->
 
 -spec validate_response(Method, Uri, ClientResponse, ServerResponse, HA1) -> Result when
   Method :: method(),
-  Uri :: uri(),
+  Uri :: binary(),
   ClientResponse :: binary(),
   ServerResponse :: binary(),
   HA1 :: binary(),
