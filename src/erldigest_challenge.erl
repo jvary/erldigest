@@ -30,21 +30,18 @@ make_challenge(Challenge) when is_map(Challenge) ->
 make_challenge(_) ->
   {error, badarg}.
 
--spec get_value(Name::atom(), Challenge::binary() | map()) -> {ok, Value::binary()} | {error, Reason::atom()}.
-get_value(Name, Challenge) when is_binary(Challenge) ->
-  {ok, ParsedChallenge} = erldigest_challenge:parse(Challenge),
-  maps:get(Name, ParsedChallenge);
-get_value(Name, Challenge) when is_map(Challenge) ->
-  maps:get(Name, Challenge);
+-spec get_value(Name::atom(), Challenge::challenge()) -> {ok, Value::binary()} | {error, Reason::atom()}.
+get_value(Name, Challenge) when is_atom(Name), is_map(Challenge) ->
+  {ok, maps:get(Name, Challenge)};
 get_value(_, _) ->
   {error, badarg}.
 
--spec get_value(Name::atom(), Challenge::binary() | map(), Default::binary()) -> {ok, Value::binary()} | {error, Reason::atom()}.
+-spec get_value(Name::atom(), Challenge::challenge(), Default::binary()) -> {ok, Value::binary()} | {error, Reason::atom()}.
 get_value(Name, Challenge, Default) ->
   try get_value(Name, Challenge) of
     Value -> Value
   catch
-    error:{badkey, Name} -> Default
+    error:{badkey, Name} -> {ok, Default}
   end.
 
 %%%===================================================================
