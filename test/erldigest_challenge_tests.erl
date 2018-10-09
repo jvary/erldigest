@@ -19,7 +19,6 @@ decode_simple_challenge_test() ->
               algorithm => <<"SHA256">>,
               qop => <<"auth,auth-int">>},
   ?assertEqual(Expected, Result).
-% TODO: Add a test for : qop="auth, auth-int" (SPACE)
 
 encode_challenge_response_test() ->
   Response = #{username => <<"Mufasa">>,

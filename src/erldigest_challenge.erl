@@ -32,7 +32,7 @@ make_challenge(_) ->
 
 -spec get_value(Name::atom(), Challenge::binary() | map()) -> {ok, Value::binary()} | {error, Reason::atom()}.
 get_value(Name, Challenge) when is_binary(Challenge) ->
-  ParsedChallenge = erldigest_challenge:parse(Challenge),
+  {ok, ParsedChallenge} = erldigest_challenge:parse(Challenge),
   maps:get(Name, ParsedChallenge);
 get_value(Name, Challenge) when is_map(Challenge) ->
   maps:get(Name, Challenge);

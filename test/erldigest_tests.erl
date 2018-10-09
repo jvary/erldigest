@@ -165,3 +165,14 @@ validate_bad_qop_response_test() ->
   erldigest:calculate_response(<<"GET">>, <<"/api/param.cgi?req=General.Brand.CompanyName&req=Network.1.MacAddress">>, Challenge, <<"admin">>, <<"admin">>),
   Result = erldigest:validate_response(get, <<"/api/param.cgi?req=General.Brand.CompanyName&req=Network.1.MacAddress">>, ExpectedResponse, Challenge, HA1),
   ?assertMatch({error, bad_qop}, Result).
+
+generate_challenge_test() ->
+  meck:new(erldigest_nonce_generator, [passthrough, unstick, nolink]),
+  meck:expect(erldigest_nonce_generator, generate, 0, {<<"00000001">>, <<"86859d0e047b826eb82a0463270916e7">>}),
+  {ok, Challenge} = erldigest:generate_challenge(<<"tata.com">>, auth),
+  Expected = <<"Digest realm=\"tata.com\",",
+                      "nonce=\"86859d0e047b826eb82a0463270916e7\",",
+                      "qop=\"auth\"">>,
+  meck:unload(erldigest_nonce_generator),
+  io:format("~nExpected: ~p~nGot     : ~p~n", [Expected, Challenge]),
+  ?assertMatch(Expected, Challenge).

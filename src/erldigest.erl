@@ -1,8 +1,25 @@
 -module(erldigest).
 
 -export([calculate_response/5,
-         validate_response/5]).
+         validate_response/5,
+         generate_challenge/2]).
 
+-type method() :: atom() | binary() | string().
+-type uri() :: {Host::binary(), Path::binary(), Params::binary()}.
+-type qop() :: none | auth | auth_int | both.
+-type challenge() :: erldigest_challenge:challenge().
+
+%%%===================================================================
+%%% API
+%%%===================================================================
+
+-spec calculate_response(Method, Uri, Headers, Username, Password) -> Result when
+  Method :: method(),
+  Uri :: uri(),
+  Headers :: #{binary() => binary()},
+  Username :: binary(),
+  Password :: binary(),
+  Result :: {ok, challenge()} | {error, Reason::term()}.
 calculate_response(Method, Uri, Headers, Username, Password) ->
   {ok, Options} = erldigest_challenge:parse(Headers),
   NewOptions = Options#{username => Username,
@@ -13,12 +30,19 @@ calculate_response(Method, Uri, Headers, Username, Password) ->
   Response = calculate_request_digest(NewOptions, Algorithm),
   erldigest_challenge:make_challenge(Response).
 
+-spec validate_response(Method, Uri, ClientResponse, ServerResponse, HA1) -> Result when
+  Method :: method(),
+  Uri :: uri(),
+  ClientResponse :: binary(),
+  ServerResponse :: binary(),
+  HA1 :: binary(),
+  Result :: {ok, boolean()} | {error, Reason::term()}.
 validate_response(Method, Uri, ClientResponse, ServerResponse, HA1) ->
   {ok, Challenge} = erldigest_challenge:parse(ServerResponse),
   {ok, Response} = erldigest_challenge:parse(ClientResponse),
   Result = get_solvable_challenge(Response, Challenge#{ha1 => HA1,
-                                                         method => method_to_binary(Method),
-                                                         uri => Uri}),
+                                                       method => method_to_binary(Method),
+                                                       uri => Uri}),
   case Result of
     {ok, SolvableChallenge} ->
       Algorithm = erldigest_utils:get_digest_algorithm(SolvableChallenge),
@@ -28,6 +52,23 @@ validate_response(Method, Uri, ClientResponse, ServerResponse, HA1) ->
     {error, _Error} = Error ->
       Error
   end.
+
+-spec generate_challenge(Realm, Qop) -> Result when
+  Realm :: binary(),
+  Qop :: qop(),
+  Result :: {ok, binary()} | {error, Reason::term()}.
+generate_challenge(Realm, Qop) ->
+  RealmLine = get_realm_line(Realm),
+  NonceLine = get_nonce_line(),
+  QopLine = get_qop_line(Qop),
+  Challenge = <<"Digest ", RealmLine/binary,
+                           NonceLine/binary,
+                           QopLine/binary>>,
+  {ok, binary:part(Challenge, 0, byte_size(Challenge)-1)}.
+
+%%%===================================================================
+%%% Internal Functions
+%%%===================================================================
 
 method_to_binary(Method) ->
   list_to_binary(string:uppercase(io_lib:format("~s", [Method]))).
@@ -83,7 +124,7 @@ hex_digest(Data, Algorithm) ->
 
 get_qop(Qop) ->
   case Qop of
-    <<"auth,auth-int">> -> <<"auth">>;
+    <<"auth,auth-int">> -> <<"auth">>; %TODO: Choose wisely
     Qop -> Qop
   end.
 
@@ -101,4 +142,19 @@ try_merge_response_and_challenge(Response, Challenge) ->
     SolvableChallenge -> {ok, SolvableChallenge}
   catch
     error:Reason -> {error, Reason}
+  end.
+
+get_realm_line(Realm) ->
+  <<"realm=\"", Realm/binary, "\",">>.
+
+get_nonce_line() ->
+  {_Nc, Nonce} = erldigest_nonce_generator:generate(),
+  <<"nonce=\"", Nonce/binary, "\",">>.
+
+get_qop_line(Qop) ->
+  case Qop of
+    none -> <<>>;
+    auth -> <<"qop=\"auth\",">>;
+    auth_int -> <<"qop=\"auth-int\",">>;
+    both -> <<"qop=\"auth,auth-int\",">>
   end.
