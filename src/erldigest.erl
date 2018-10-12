@@ -130,7 +130,7 @@ get_qop(Qop) ->
 get_solvable_challenge(Response, Challenge) ->
   ServerQop = maps:get(qop, Challenge, <<>>),
   ClientQop = maps:get(qop, Response, <<>>),
-  PossibleServerQop = binary:split(binary:replace(ServerQop, <<" ">>, <<>>, [global]), <<",">>),
+  PossibleServerQop = [<<>> | binary:split(binary:replace(ServerQop, <<" ">>, <<>>, [global]), <<",">>)],
   case lists:member(ClientQop, PossibleServerQop) of
     false -> {error, bad_qop};
     true -> try_merge_response_and_challenge(Response, maps:without([qop], Challenge))
