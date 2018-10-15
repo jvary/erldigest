@@ -2,10 +2,13 @@
 
 -export([calculate_response/5,
          validate_response/5,
-         generate_challenge/2]).
+         generate_challenge/2,
+         get_A1_hash/3,
+         get_A1_hash/4]).
 
 -type method() :: atom() | binary() | string().
 -type qop() :: none | auth | auth_int | both.
+-type algorithm() :: md5 | sha256.
 -type challenge() :: erldigest_challenge:challenge().
 
 %%%===================================================================
@@ -64,6 +67,23 @@ generate_challenge(Realm, Qop) ->
                            NonceLine/binary,
                            QopLine/binary>>,
   {ok, binary:part(Challenge, 0, byte_size(Challenge)-1)}.
+
+-spec get_A1_hash(Username, Realm, Password) -> Result when
+  Username :: binary(),
+  Realm :: binary(),
+  Password :: binary(),
+  Result :: binary().
+get_A1_hash(Username, Realm, Password) ->
+  get_A1_hash(#{username => Username, realm => Realm, password => Password}, md5).
+
+-spec get_A1_hash(Username, Realm, Password) -> Result when
+  Username :: binary(),
+  Realm :: binary(),
+  Password :: binary(),
+  Algorithm :: algorithm(),
+  Result :: binary().
+get_A1_hash(Username, Realm, Password, Algorithm)->
+  get_A1_hash(#{username => Username, realm => Realm, password => Password}, Algorithm).
 
 %%%===================================================================
 %%% Internal Functions
