@@ -6,3 +6,4 @@ A library that provide response to digest authentication challenges.
 
 ## Authors
 - Kevin Lagace
+- Alexandre Caron

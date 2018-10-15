@@ -176,3 +176,13 @@ generate_challenge_test() ->
   meck:unload(erldigest_nonce_generator),
   io:format("~nExpected: ~p~nGot     : ~p~n", [Expected, Challenge]),
   ?assertMatch(Expected, Challenge).
+
+get_A1_hash_with_default_algorithm_test() ->
+  A1 = erldigest:get_A1_hash(<<"Username">>, <<"Realm">>, <<"Password">>),
+  Expected = <<"e3532ec9eb3371eb02eb486a03730ab2">>,
+  ?assertMatch(Expected, A1).
+
+get_A1_hash_with_algorithm_test() ->
+  A1 = erldigest:get_A1_hash(<<"Username">>, <<"Realm">>, <<"Password">>, sha256),
+  Expected = <<"3c8f7cf5011a9669419e885f1daba4236fe23114cdc82c9b486b955a95deb2b9">>,
+  ?assertMatch(Expected, A1).

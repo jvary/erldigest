@@ -76,7 +76,7 @@ generate_challenge(Realm, Qop) ->
 get_A1_hash(Username, Realm, Password) ->
   get_A1_hash(#{username => Username, realm => Realm, password => Password}, md5).
 
--spec get_A1_hash(Username, Realm, Password) -> Result when
+-spec get_A1_hash(Username, Realm, Password, Algorithm) -> Result when
   Username :: binary(),
   Realm :: binary(),
   Password :: binary(),
