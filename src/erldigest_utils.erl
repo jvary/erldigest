@@ -1,23 +1,9 @@
 -module(erldigest_utils).
 
--export([binary_to_hex/1,
-         remove_surrounding_quotes/1,
+-export([remove_surrounding_quotes/1,
          get_digest_algorithm/1]).
 
-binary_to_hex(Binary) ->
-  binary_to_hex(Binary, <<>>).
-binary_to_hex(<<X:8/integer, Rest/binary>>, Acc) ->
-  Hex = string:lowercase(byte_to_hex(X)),
-  binary_to_hex(Rest, <<Acc/binary, Hex/binary>>);
-binary_to_hex(<<>>, Acc) ->
-  Acc.
-
-byte_to_hex(X) when X band 16#f0 > 0 ->
-  integer_to_binary(X, 16);
-byte_to_hex(X) ->
-  <<"0", (integer_to_binary(X, 16))/binary>>.
-
-remove_surrounding_quotes(Str) ->
+remove_surrounding_quotes(<<Str/binary>>) ->
   remove_surrounding_quotes(Str, false).
 remove_surrounding_quotes(<<"\"", Str/binary>>, false) ->
   remove_surrounding_quotes(Str, true);

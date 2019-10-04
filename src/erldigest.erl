@@ -139,7 +139,7 @@ get_A2_hash(#{method := Method, uri := Uri}, Algorithm) ->
   hex_digest(A2, Algorithm).
 
 hex_digest(Data, Algorithm) ->
-  erldigest_utils:binary_to_hex(crypto:hash(Algorithm, Data)).
+  erldigest_binutils:binary_to_hex(crypto:hash(Algorithm, Data)).
 
 get_qop(Qop) ->
   case Qop of

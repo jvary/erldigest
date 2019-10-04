@@ -101,7 +101,7 @@ validate_good_response_test() ->
                               "qop=\"auth\",",
                               "nc=00000001">>,
   A1 = <<"admin:Login to 2J0085BFAG00007:admin">>,
-  HA1 = erldigest_utils:binary_to_hex(crypto:hash(md5, A1)),
+  HA1 = erldigest_binutils:binary_to_hex(crypto:hash(md5, A1)),
   erldigest:calculate_response(<<"GET">>, <<"/api/param.cgi?req=General.Brand.CompanyName&req=Network.1.MacAddress">>, Challenge, <<"admin">>, <<"admin">>),
   {ok, AreResponseEquals} = erldigest:validate_response(get, <<"/api/param.cgi?req=General.Brand.CompanyName&req=Network.1.MacAddress">>, ExpectedResponse, Challenge, HA1),
   ?assert(AreResponseEquals).
@@ -121,7 +121,7 @@ validate_bad_response_test() ->
                               "qop=\"auth\",",
                               "nc=00000001">>,
   A1 = <<"admin:Login to 2J0085BFAG00007:admin">>,
-  HA1 = erldigest_utils:binary_to_hex(crypto:hash(md5, A1)),
+  HA1 = erldigest_binutils:binary_to_hex(crypto:hash(md5, A1)),
   erldigest:calculate_response(<<"GET">>, <<"/api/param.cgi?req=General.Brand.CompanyName&req=Network.1.MacAddress">>, Challenge, <<"admin">>, <<"admin">>),
   {ok, AreResponseEquals} = erldigest:validate_response(get, <<"/api/param.cgi?req=General.Brand.CompanyName&req=Network.1.MacAddress">>, ExpectedResponse, Challenge, HA1),
   ?assertNot(AreResponseEquals).
@@ -141,7 +141,7 @@ validate_forged_response_test() ->
                               "qop=\"auth\",",
                               "nc=00000001">>,
   A1 = <<"admin:Login to 2J0085BFAG00007:admin">>,
-  HA1 = erldigest_utils:binary_to_hex(crypto:hash(md5, A1)),
+  HA1 = erldigest_binutils:binary_to_hex(crypto:hash(md5, A1)),
   erldigest:calculate_response(<<"GET">>, <<"/api/param.cgi?req=General.Brand.CompanyName&req=Network.1.MacAddress">>, Challenge, <<"admin">>, <<"admin">>),
   {ok, AreResponseEquals} = erldigest:validate_response(get, <<"/api/param.cgi?req=General.Brand.CompanyName&req=Network.1.MacAddress">>, ExpectedResponse, Challenge, HA1),
   ?assert(AreResponseEquals).
@@ -161,7 +161,7 @@ validate_bad_qop_response_test() ->
                               "qop=\"Invalid_Qop\",",
                               "nc=00000001">>,
   A1 = <<"admin:Login to 2J0085BFAG00007:admin">>,
-  HA1 = erldigest_utils:binary_to_hex(crypto:hash(md5, A1)),
+  HA1 = erldigest_binutils:binary_to_hex(crypto:hash(md5, A1)),
   erldigest:calculate_response(<<"GET">>, <<"/api/param.cgi?req=General.Brand.CompanyName&req=Network.1.MacAddress">>, Challenge, <<"admin">>, <<"admin">>),
   Result = erldigest:validate_response(get, <<"/api/param.cgi?req=General.Brand.CompanyName&req=Network.1.MacAddress">>, ExpectedResponse, Challenge, HA1),
   ?assertMatch({error, bad_qop}, Result).
