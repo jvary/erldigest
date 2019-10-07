@@ -26,7 +26,7 @@ calculate_response(Method, Uri, Headers, Username, Password) ->
   {ok, Options} = erldigest_challenge:parse(Headers),
   NewOptions = Options#{username => Username,
                         password => Password,
-                        method => method_to_binary(Method),
+                        method => erldigest_utils:method_to_binary(Method),
                         uri => Uri},
   Algorithm = erldigest_utils:get_digest_algorithm(Options),
   Response = calculate_request_digest(NewOptions, Algorithm),
@@ -43,7 +43,7 @@ validate_response(Method, Uri, ClientResponse, ServerResponse, HA1) ->
   {ok, Challenge} = erldigest_challenge:parse(ServerResponse),
   {ok, Response} = erldigest_challenge:parse(ClientResponse),
   Result = get_solvable_challenge(Response, Challenge#{ha1 => HA1,
-                                                       method => method_to_binary(Method),
+                                                       method => erldigest_utils:method_to_binary(Method),
                                                        uri => Uri}),
   case Result of
     {ok, SolvableChallenge} ->
@@ -88,9 +88,6 @@ get_A1_hash(Username, Realm, Password, Algorithm)->
 %%%===================================================================
 %%% Internal Functions
 %%%===================================================================
-
-method_to_binary(Method) ->
-  list_to_binary(string:uppercase(io_lib:format("~s", [Method]))).
 
 calculate_request_digest(#{qop := Qop, nonce := Nonce} = Options, Algorithm) ->
   HA1 = get_A1_hash(Options, Algorithm),
