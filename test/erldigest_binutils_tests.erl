@@ -1,7 +1,7 @@
 -module(erldigest_binutils_tests).
 -include_lib("eunit/include/eunit.hrl").
 
-hex_to_bin_test_base() ->
+hex_to_bin_test_base_test() ->
   Result = erldigest_binutils:binary_to_hex(<<"HEHEHOHOHE0212!_", 3:8, 16:8>>),
   ?assertEqual(<<"48454845484f484f484530323132215f0310">>, Result).
 
