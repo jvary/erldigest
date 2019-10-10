@@ -9,14 +9,16 @@
 
 -export_type([challenge/0]).
 
+-compile({parse_transform, ct_expand}).
+
 %%%===================================================================
 %%% API
 %%%===================================================================
 
 -spec parse(Challenge::binary()) -> {ok, challenge()} | {error, Reason::atom()}.
 parse(<<"Digest ", Challenge/binary>>) ->
-  Regex = <<"([^=]+)=((?:[^\"]*)|(?:\"[^\"]*\"))(?:\\s*,\\s*|\\s*$)">>,
-  case re:run(Challenge,  Regex, [global]) of
+  {ok, CompiledRegEx} = ct_expand:term(re:compile(<<"([^=]+)=((?:[^\"]*)|(?:\"[^\"]*\"))(?:\\s*,\\s*|\\s*$)">>)),
+  case re:run(Challenge,  CompiledRegEx, [global]) of
     {match, Captures} -> extract_fields(Captures, Challenge);
     nomatch -> {error, badarg}
   end;
