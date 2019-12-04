@@ -38,26 +38,30 @@ calculate_response(Method, Uri, Headers, Username, Password) ->
 -spec validate_response(Method, Uri, ClientResponse, ServerResponse, HA1) -> Result when
   Method :: method(),
   Uri :: binary(),
-  ClientResponse :: binary(),
+  ClientResponse :: binary() | challenge(),
   ServerResponse :: binary() | challenge(),
   HA1 :: binary(),
   Result :: {ok, boolean()} | {error, Reason::term()}.
-validate_response(Method, Uri, ClientResponse, <<ServerResponse/binary>>, HA1) ->
-  {ok, Challenge} = erldigest_challenge:parse(ServerResponse),
-  #{qop := EntryServerQop} = Challenge,
-  NewChallenge = Challenge#{qop => binary:replace(EntryServerQop, <<" ">>, <<>>, [global])},
-  validate_response(Method, Uri, ClientResponse, NewChallenge, HA1);
+validate_response(Method, Uri, <<ClientResponse/binary>>, ServerResponse, HA1) ->
+  {ok, ClientChallenge} = erldigest_challenge:parse(ClientResponse),
+  validate_response(Method, Uri, ClientChallenge, ServerResponse, HA1);
 
-validate_response(Method, Uri, ClientResponse, ServerResponse, HA1) when is_map(ServerResponse)->
-  {ok, Response} = erldigest_challenge:parse(ClientResponse),
-  Result = get_solvable_challenge(Response, ServerResponse#{ha1 => HA1,
-                                                            method => erldigest_utils:method_to_binary(Method),
-                                                            uri => Uri}),
+validate_response(Method, Uri, ClientResponse, <<ServerResponse/binary>>, HA1) ->
+  {ok, ServerChallenge} = erldigest_challenge:parse(ServerResponse),
+  #{qop := EntryServerQop} = ServerChallenge,
+  NewServerChallenge = ServerChallenge#{qop => binary:replace(EntryServerQop, <<" ">>, <<>>, [global])},
+  validate_response(Method, Uri, ClientResponse, NewServerChallenge, HA1);
+
+validate_response(Method, Uri, ClientResponse, ServerResponse, HA1) when is_map(ClientResponse)
+                                                                    andalso is_map(ServerResponse) ->
+  Result = get_solvable_challenge(ClientResponse, ServerResponse#{ha1 => HA1,
+                                                                  method => erldigest_utils:method_to_binary(Method),
+                                                                  uri => Uri}),
   case Result of
     {ok, SolvableChallenge} ->
       Algorithm = erldigest_utils:get_digest_algorithm(SolvableChallenge),
       RealResponse = calculate_response_digest(SolvableChallenge, Algorithm),
-      AreResponseEquals = maps:get(response, RealResponse) == maps:get(response, Response),
+      AreResponseEquals = maps:get(response, RealResponse) == maps:get(response, ClientResponse),
       {ok, AreResponseEquals};
     {error, _Error} = Error ->
       Error
